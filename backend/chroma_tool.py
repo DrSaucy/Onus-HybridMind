@@ -11,7 +11,7 @@ from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 load_dotenv()
 
 # Initialize Settings
-Settings.llm = GoogleGenAI(model="gemini-2.5-flash", api_key=os.getenv("GOOGLE_API_KEY"))
+Settings.llm = GoogleGenAI(model="gemini-3.1-flash-lite", api_key=os.getenv("GOOGLE_API_KEY"))
 Settings.embed_model = GoogleGenAIEmbedding(model="gemini-embedding-2", api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Initialize ChromaDB client and collection

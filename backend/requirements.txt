@@ -1,0 +1,10 @@
+llama-index-core
+llama-index-llms-google-genai
+llama-index-embeddings-google-genai
+llama-index-vector-stores-chroma
+chromadb
+psycopg2-binary
+python-dotenv
+fastapi
+uvicorn
+sqlalchemy

@@ -1,7 +1,7 @@
 import { Search, AlertTriangle, Activity } from "lucide-react";
 
 interface AuditCardProps {
-  agent: "executor" | "verifier" | "chronicler";
+  agent: string;
   timestamp: string;
   content: React.ReactNode;
   badge?: {
@@ -13,15 +13,15 @@ interface AuditCardProps {
 
 export function AuditCard({ agent, timestamp, content, badge, variant = "normal" }: AuditCardProps) {
   const getIconBox = () => {
-    if (agent === "executor") return <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl"><Search className="w-5 h-5" /></div>;
-    if (agent === "verifier") return <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 p-2.5 rounded-xl"><AlertTriangle className="w-5 h-5" /></div>;
-    return <div className="bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 p-2.5 rounded-xl"><Activity className="w-5 h-5" /></div>;
+    const ag = agent.toLowerCase();
+    if (ag.includes("executor")) return <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl"><Search className="w-5 h-5" /></div>;
+    if (ag.includes("verifier")) return <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 p-2.5 rounded-xl"><AlertTriangle className="w-5 h-5" /></div>;
+    if (ag.includes("chronicler")) return <div className="bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 p-2.5 rounded-xl"><Activity className="w-5 h-5" /></div>;
+    return <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 dark:text-indigo-400 p-2.5 rounded-xl"><Activity className="w-5 h-5" /></div>;
   };
 
   const getTitle = () => {
-    if (agent === "executor") return "Executor Agent";
-    if (agent === "verifier") return "Verifier Agent";
-    return "Chronicler Agent";
+    return agent;
   };
 
   const cardClasses =
@@ -53,7 +53,7 @@ export function AuditCard({ agent, timestamp, content, badge, variant = "normal"
                  )}
               </div>
             </div>
-            <div className="text-sm text-slate-600 dark:text-slate-300">
+            <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
               {content}
             </div>
           </div>
