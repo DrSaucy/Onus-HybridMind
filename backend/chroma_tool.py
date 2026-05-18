@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import chromadb
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-
-# Using the modern Google GenAI SDK to avoid the 404 and deprecation errors
 from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 
