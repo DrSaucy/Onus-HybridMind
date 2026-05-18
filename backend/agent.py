@@ -28,12 +28,12 @@ import asyncio
 
 class RateLimitedGemini(GoogleGenAI):
     async def astream_chat(self, *args, **kwargs):
-        print("[RateLimiter] Menunggu 4 detik untuk mengamankan kuota (15 RPM)...")
+        print("[RateLimiter] Waiting 4 seconds to secure the quota (15 RPM)...")
         await asyncio.sleep(4)
         return await super().astream_chat(*args, **kwargs)
 
     async def achat(self, *args, **kwargs):
-        print("[RateLimiter] Menunggu 4 detik untuk mengamankan kuota (15 RPM)...")
+        print("[RateLimiter] Waiting 4 seconds to secure the quota (15 RPM)...")
         await asyncio.sleep(4)
         return await super().achat(*args, **kwargs)
 
