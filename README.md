@@ -120,6 +120,35 @@ Navigate to `http://localhost:5173`.
 
 ---
 
+## 🚀 Deployment (CLI Workflow)
+
+The project is designed to be deployed using cloud CLI tools. We separate the stateless frontend (Vercel) and the long-running backend (Railway).
+
+### 1. Deploy Backend (Railway)
+1. Install Railway CLI: `npm i -g @railway/cli`
+2. Run `railway login`
+3. Navigate to backend: `cd backend`
+4. Initialize project: `railway init`
+5. Set variables:
+   ```bash
+   railway variables set GOOGLE_API_KEY="your_api_key"
+   railway variables set SUPABASE_DB_URL="your_db_url"
+   ```
+6. Deploy code: `railway up`
+7. Generate public URL: `railway domain`
+
+### 2. Deploy Frontend (Vercel)
+1. Install Vercel CLI: `npm i -g vercel`
+2. Navigate to frontend: `cd frontend`
+3. Link the backend URLs via environment variables. Create a `.env` file or export them:
+   ```env
+   VITE_API_URL=https://<your_railway_domain>/chat
+   VITE_WS_URL=wss://<your_railway_domain>/ws/audit
+   ```
+4. Deploy code: `vercel --prod`
+
+---
+
 ## Usage
 
 With both servers running, type a natural language audit command in the chat interface:

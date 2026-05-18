@@ -148,7 +148,7 @@ activemq-data/
 *.sage.py
 
 # Vector Databases
-chroma_db/
+# chroma_db/ (Commented out to allow Railway to upload the vector store)
 
 # Environments
 .env
