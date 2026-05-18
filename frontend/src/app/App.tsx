@@ -161,7 +161,7 @@ export default function App() {
         <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden relative">
           {/* Left Pane - Chat Workspace */}
           <div className="w-full lg:w-[60%] min-h-[70vh] lg:min-h-0 bg-[#F4F7FA] dark:bg-transparent relative flex flex-col shrink-0 lg:shrink shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-            <div className="flex-1 overflow-y-auto p-4 lg:p-8 pb-[140px] lg:pb-[140px]">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-8 pb-[140px] lg:pb-[140px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex flex-col gap-8 max-w-4xl mx-auto">
                 {messages.map((m, i) => (
                   <ChatMessage
@@ -169,6 +169,7 @@ export default function App() {
                     type={m.type}
                     content={m.content}
                     timestamp={m.timestamp}
+                    isDark={isDark}
                   />
                 ))}
                 {isLoading && (
@@ -176,6 +177,7 @@ export default function App() {
                     type="ai"
                     content={<span className="animate-pulse">Thinking and consulting tools...</span>}
                     timestamp="HYBRIDMIND AI"
+                    isDark={isDark}
                   />
                 )}
                 <div ref={messagesEndRef} />
@@ -243,7 +245,7 @@ export default function App() {
             </div>
 
             {/* Feed */}
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex flex-col gap-4">
                 {auditLogs.map((log, i) => (
                   <AuditCard

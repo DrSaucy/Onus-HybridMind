@@ -116,10 +116,24 @@ class AuditWorkflow(Workflow):
 
     @step
     async def verifier_agent(self, ev: DataGatheredEvent) -> AuditCompleteEvent | VerificationFailedEvent:
-        prompt = f"""You are an elite financial auditor. Read the SQL data and the Contract terms. 
-Step 1: Check if the quantity purchased meets the threshold for a rebate. 
-Step 2: If it does, calculate the exact dollar amount of the rebate owed based on the total paid. 
-Step 3: Output ONLY a raw JSON object with the keys: 'vendor', 'discrepancy_found' (boolean), 'amount_owed' (number), and 'reasoning' (brief string).
+        prompt = f"""You are a strict financial auditor. Analyze the SQL procurement data and the contract terms below.
+
+RULES (follow exactly):
+1. ONLY set "discrepancy_found" to true if ALL of the following conditions are met:
+   - The contract terms explicitly mention a specific vendor rebate or discount threshold.
+   - The vendor's actual quantity from SQL data EXCEEDS that threshold.
+   - The contract clearly applies to THIS vendor (the vendor name must match or be implied).
+2. If the contract terms are generic, belong to a different vendor, or the quantity does NOT exceed the threshold, set "discrepancy_found" to false and "amount_owed" to 0.
+3. Do NOT invent or assume contract terms that are not explicitly stated in the Contract Terms section below.
+
+Output ONLY a raw JSON object with these exact keys:
+- "vendor" (string: the vendor name from SQL data)
+- "discrepancy_found" (boolean)
+- "total_quantity" (number: from SQL data)
+- "total_expenditure" (number: from SQL data)
+- "rebate_percentage" (string: e.g. "15%" if found in contract, else "N/A")
+- "amount_owed" (number: 0 if no discrepancy)
+- "reasoning" (string: brief explanation of your conclusion)
 
 SQL Data:
 {ev.sql_result}
@@ -145,17 +159,26 @@ Contract Terms:
             amount_raw = str(parsed_dict.get("amount_owed", 0)).replace(',', '')
             amount = float(amount_raw)
             
-            # Check if amount_owed is exactly 180000
-            if amount != 180000.0:
-                print(f"DEBUG: Math failed. Extracted amount: {amount}. Raw response: {raw_text}")
-                return VerificationFailedEvent(reason=f"Math invalid. Extracted amount: {amount}")
+            discrepancy = parsed_dict.get("discrepancy_found", False)
+            
+            if not discrepancy:
+                # No discrepancy found - still complete the audit with a clean result
+                if self.manager:
+                    await self.manager.broadcast(json.dumps({
+                        "type": "audit",
+                        "agent": "verifier",
+                        "message": f"Verification Complete. No discrepancy detected. {parsed_dict.get('reasoning', '')}",
+                        "badge": {"text": "CLEARED", "color": "yellow"},
+                        "variant": "normal"
+                    }))
+                return AuditCompleteEvent(final_json=parsed_dict, pdf_file=ev.pdf_file, pdf_page=ev.pdf_page)
                 
             reasoning = parsed_dict.get('reasoning', 'Discrepancy detected.')
             if self.manager:
                 await self.manager.broadcast(json.dumps({
                     "type": "audit",
                     "agent": "verifier",
-                    "message": f"Math validation failed. {reasoning}",
+                    "message": f"Verification Successful. Discrepancy Confirmed: {reasoning}",
                     "badge": {"text": "LOW INTEGRITY", "color": "yellow"},
                     "variant": "normal"
                 }))
@@ -170,15 +193,25 @@ Contract Terms:
     @step
     async def chronicler_agent(self, ev: AuditCompleteEvent) -> StopEvent:
         amount_owed = float(ev.final_json.get("amount_owed", 0))
+        discrepancy = ev.final_json.get("discrepancy_found", False)
         
         if self.manager:
-            await self.manager.broadcast(json.dumps({
-                "type": "audit",
-                "agent": "chronicler",
-                "message": f"⚠️ ${amount_owed:,.0f} LEAKAGE DETECTED.\n\nSource: q1_procurement + {ev.pdf_file} Page {ev.pdf_page}",
-                "badge": {"text": "CRITICAL BATCH #44", "color": "red"},
-                "variant": "critical"
-            }))
+            if discrepancy:
+                await self.manager.broadcast(json.dumps({
+                    "type": "audit",
+                    "agent": "chronicler",
+                    "message": f"⚠️ ${amount_owed:,.0f} LEAKAGE DETECTED.\n\nSource: q1_procurement + {ev.pdf_file} Page {ev.pdf_page}",
+                    "badge": {"text": "CRITICAL", "color": "red"},
+                    "variant": "critical"
+                }))
+            else:
+                await self.manager.broadcast(json.dumps({
+                    "type": "audit",
+                    "agent": "chronicler",
+                    "message": f"✅ Audit complete. No financial leakage detected for this vendor.\n\nSource: q1_procurement + {ev.pdf_file}",
+                    "badge": {"text": "CLEARED", "color": "yellow"},
+                    "variant": "normal"
+                }))
             
         return StopEvent(result=ev.final_json)
 
