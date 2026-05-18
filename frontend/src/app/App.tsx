@@ -50,7 +50,8 @@ export default function App() {
 
   // WebSocket Connection
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/audit");
+    const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws/audit";
+    const ws = new WebSocket(wsUrl);
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -86,7 +87,8 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/chat", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000/chat";
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage }),
