@@ -7,8 +7,6 @@ from llama_index.llms.google_genai import GoogleGenAI
 load_dotenv()
 verifier_llm = GoogleGenAI(model="gemini-3.1-flash-lite", api_key=os.getenv("GOOGLE_API_KEY"))
 
-
-# Assuming sql_tool and chroma_tool expose a ready-to-use query_engine
 from sql_tool import query_engine as sql_engine
 from chroma_tool import query_engine as chroma_engine
 
@@ -162,7 +160,6 @@ Contract Terms:
             discrepancy = parsed_dict.get("discrepancy_found", False)
             
             if not discrepancy:
-                # No discrepancy found - still complete the audit with a clean result
                 if self.manager:
                     await self.manager.broadcast(json.dumps({
                         "type": "audit",
